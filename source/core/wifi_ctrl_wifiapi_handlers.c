@@ -399,6 +399,7 @@ static void wifiapi_handle_set_btm_request(char **args, unsigned int num_args,
     mac_address_t client_mac, candidate_mac;
     wifi_BTMRequest_t *btm_request = calloc(1, sizeof(wifi_BTMRequest_t));
 
+        snprintf(result_buf, result_buf_size, "%s:%d DGG onewifi\n",__func__,__LINE__);
     if (!btm_request) {
         snprintf(result_buf, result_buf_size, "Failed to allocate memory\n");
         return;

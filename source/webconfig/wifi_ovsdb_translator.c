@@ -236,6 +236,7 @@ int convert_apindex_to_cloudifname(wifi_platform_property_t *wifi_prop, int idx,
         return RETURN_ERR;
     }
 
+    wifi_util_info_print(WIFI_WEBCONFIG, "%s:%d: DGG 1\n", __func__, __LINE__);
     if (convert_vapname_to_cloudifname(vapname, if_name, len) == RETURN_OK) {
         return RETURN_OK;
     }
@@ -1212,7 +1213,7 @@ webconfig_error_t webconfig_ovsdb_decode(webconfig_t *config, const char *str,
         return webconfig_error_decode;
     }
 
-    wifi_util_info_print(WIFI_WEBCONFIG, "%s:%d: OVSM decode subdoc type %d sucessfully\n",
+    wifi_util_info_print(WIFI_WEBCONFIG, "%s:%d: OVSM weee decode subdoc type %d sucessfully\n",
         __func__, __LINE__, webconfig_ovsdb_data.type);
     *type = webconfig_ovsdb_data.type;
     debug_external_protos(&webconfig_ovsdb_data, __func__, __LINE__);
@@ -3549,6 +3550,8 @@ webconfig_error_t   translate_vap_object_to_ovsdb_vif_state_for_dml(webconfig_su
         return webconfig_error_invalid_subdoc;
     }
 
+
+    wifi_util_info_print(WIFI_WEBCONFIG, "%s:%d: DGG 2\n", __func__, __LINE__);
     hal_cap = &decoded_params->hal_cap;
     //Get the number of radios
     for (i = 0; i < decoded_params->num_radios; i++) {
@@ -5714,6 +5717,7 @@ webconfig_error_t   translate_vap_object_to_ovsdb_vif_state(webconfig_subdoc_dat
     hal_cap = &decoded_params->hal_cap;
     wifi_prop = &decoded_params->hal_cap.wifi_prop;
 
+    wifi_util_info_print(WIFI_WEBCONFIG, "%s:%d: DGG 3\n", __func__, __LINE__);
     //Get the number of radios
     for (i = 0; i < decoded_params->num_radios; i++) {
         radio = &decoded_params->radios[i];

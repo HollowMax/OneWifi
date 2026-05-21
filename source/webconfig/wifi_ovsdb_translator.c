@@ -48,6 +48,12 @@
 #define BLASTER_STATE_LEN    10
 #define INVALID_INDEX        256
 
+#define MLO_HOME        "private_ssid_mlo"
+#define MLO_XHS         "iot_ssid_mlo"
+#define MLO_LNF         "lnf_psk_mlo"
+#define MLO_BHAUL_AP    "mesh_backhaul_mlo"
+#define MLO_BHAUL_STA   "mesh_sta_mlo"
+
 static pthread_mutex_t webconfig_data_lock = PTHREAD_MUTEX_INITIALIZER;
 static webconfig_subdoc_data_t  webconfig_ovsdb_data;
 /* global pointer to webconfig subdoc encoded data to avoid memory loss when passing data to OVSM */
@@ -3066,6 +3072,9 @@ webconfig_error_t translate_private_vap_info_to_vif_state(wifi_vap_info_t *vap, 
         return webconfig_error_translate_to_ovsdb;
     }
 
+    snprintf(vap_row->mld_if_name, sizeof(vap_row->mld_if_name), "%s", MLO_HOME);
+    wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Updating mld_if_name to %s\n", __func__, __LINE__, vap_row->mld_if_name);
+
     return webconfig_error_none;
 }
 
@@ -3097,6 +3106,9 @@ webconfig_error_t translate_iot_vap_info_to_vif_state(wifi_vap_info_t *vap, cons
         return webconfig_error_translate_to_ovsdb;
     }
 
+    snprintf(vap_row->mld_if_name, sizeof(vap_row->mld_if_name), "%s", MLO_XHS);
+    wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Updating mld_if_name to %s\n", __func__, __LINE__, vap_row->mld_if_name);
+
     return webconfig_error_none;
 }
 
@@ -3112,6 +3124,9 @@ webconfig_error_t translate_lnf_psk_vap_info_to_vif_state(wifi_vap_info_t *vap, 
         wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Translation failed for personal security\n", __func__, __LINE__);
         return webconfig_error_translate_to_ovsdb;
     }
+
+    snprintf(vap_row->mld_if_name, sizeof(vap_row->mld_if_name), "%s", MLO_LNF);
+    wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Updating mld_if_name to %s\n", __func__, __LINE__, vap_row->mld_if_name);
 
     return webconfig_error_none;
 }
@@ -3161,6 +3176,9 @@ webconfig_error_t translate_mesh_backhaul_vap_info_to_vif_state(wifi_vap_info_t 
         wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Translation failed for personal security\n", __func__, __LINE__);
         return webconfig_error_translate_to_ovsdb;
     }
+
+    snprintf(vap_row->mld_if_name, sizeof(vap_row->mld_if_name), "%s", MLO_BHAUL_AP);
+    wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Updating mld_if_name to %s\n", __func__, __LINE__, vap_row->mld_if_name);
 
     return webconfig_error_none;
 }
@@ -3240,6 +3258,10 @@ webconfig_error_t translate_mesh_sta_vap_info_to_vif_state(const wifi_vap_info_t
         wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Translation failed for security\n", __func__, __LINE__);
         return webconfig_error_translate_to_ovsdb;
     }
+
+    snprintf(vap_row->mld_if_name, sizeof(vap_row->mld_if_name), "%s", MLO_BHAUL_STA);
+    wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Updating mld_if_name to %s\n", __func__, __LINE__, vap_row->mld_if_name);
+
     return webconfig_error_none;
 }
 
@@ -3331,15 +3353,6 @@ webconfig_error_t translate_vap_object_to_ovsdb_associated_clients(const rdk_wif
         assoc_dev_data = hash_map_get_first(rdk_vap_info->associated_devices_map);
 
         while (assoc_dev_data != NULL) {
-            if (assoc_dev_data->dev_stats.cli_MLDEnable && !assoc_dev_data->association_link) {
-                /* Notify MLD client only on assoc link to be aligned with WebUI
-                 * This is backward compatibility alignment before final MLD client support in WebUI/ovsdb*/
-                wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: MLO STA - Skipping non assoc link, vap_name '%s'\n",
-                    __func__, __LINE__, rdk_vap_info->vap_name);
-                assoc_dev_data = hash_map_get_next(rdk_vap_info->associated_devices_map, assoc_dev_data);
-                continue;
-            }
-
             if (associated_client_count >= WEBCONFIG_MAX_ASSOCIATED_CLIENTS) {
                 wifi_util_error_print(WIFI_WEBCONFIG,"%s:%d: Exceeded max number of associated clients %d, vap_name '%s'\n", __func__, __LINE__, WEBCONFIG_MAX_ASSOCIATED_CLIENTS, rdk_vap_info->vap_name);
                 break;
@@ -3349,10 +3362,21 @@ webconfig_error_t translate_vap_object_to_ovsdb_associated_clients(const rdk_wif
                 wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: client row empty for the client number %d\n", __func__, __LINE__, associated_client_count);
                 return webconfig_error_translate_to_ovsdb;
             }
-            snprintf(client_row->mac, sizeof(client_row->mac), "%02x:%02x:%02x:%02x:%02x:%02x", assoc_dev_data->dev_stats.cli_MACAddress[0], assoc_dev_data->dev_stats.cli_MACAddress[1],
+
+            if (assoc_dev_data->dev_stats.cli_MLDEnable) {
+                /* This is MLO client. Add mld_addr to the row. Use Link assdress for mac*/
+                snprintf(client_row->mld_addr, sizeof(client_row->mld_addr), "%02x:%02x:%02x:%02x:%02x:%02x", assoc_dev_data->dev_stats.cli_MACAddress[0], assoc_dev_data->dev_stats.cli_MACAddress[1],
                     assoc_dev_data->dev_stats.cli_MACAddress[2], assoc_dev_data->dev_stats.cli_MACAddress[3], assoc_dev_data->dev_stats.cli_MACAddress[4],
                     assoc_dev_data->dev_stats.cli_MACAddress[5]);
 
+                snprintf(client_row->mac, sizeof(client_row->mac), "%02x:%02x:%02x:%02x:%02x:%02x", assoc_dev_data->link_address[0], assoc_dev_data->link_address[1],
+                    assoc_dev_data->link_address[2], assoc_dev_data->link_address[3], assoc_dev_data->link_address[4],
+                    assoc_dev_data->link_address[5]);
+            } else {
+                snprintf(client_row->mac, sizeof(client_row->mac), "%02x:%02x:%02x:%02x:%02x:%02x", assoc_dev_data->dev_stats.cli_MACAddress[0], assoc_dev_data->dev_stats.cli_MACAddress[1],
+                    assoc_dev_data->dev_stats.cli_MACAddress[2], assoc_dev_data->dev_stats.cli_MACAddress[3], assoc_dev_data->dev_stats.cli_MACAddress[4],
+                    assoc_dev_data->dev_stats.cli_MACAddress[5]);
+            }
             if (assoc_dev_data->dev_stats.cli_Active == true) {
                 snprintf(client_row->state, sizeof(client_row->state), "active");
             } else {
@@ -3608,6 +3632,14 @@ webconfig_error_t   translate_vap_object_to_ovsdb_vif_state_for_dml(webconfig_su
                 wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Unable to find the vap schema row for %d\n", __func__, __LINE__, vap->vap_index);
                 return webconfig_error_translate_to_ovsdb;
             }
+
+            // MLD_Addr
+            snprintf(vap_row->mld_addr, sizeof(vap_row->mld_addr), "%02x:%02x:%02x:%02x:%02x:%02x", vap->u.bss_info.mld_info.common_info.mld_addr[0],
+                    vap->u.bss_info.mld_info.common_info.mld_addr[1], vap->u.bss_info.mld_info.common_info.mld_addr[2],
+                    vap->u.bss_info.mld_info.common_info.mld_addr[3], vap->u.bss_info.mld_info.common_info.mld_addr[4],
+                    vap->u.bss_info.mld_info.common_info.mld_addr[5]);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Updating mld_addr to %s\n", __func__, __LINE__, vap_row->mld_addr);
+
 
             if (radio->oper.channel) {
                 wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Updating Channel %d to %s\n", __func__, __LINE__,radio->oper.channel, vap->vap_name);
@@ -5779,6 +5811,13 @@ webconfig_error_t   translate_vap_object_to_ovsdb_vif_state(webconfig_subdoc_dat
                 wifi_util_error_print(WIFI_WEBCONFIG,"%s:%d: Unable to find the vap schema row for %d\n", __func__, __LINE__, vap->vap_index);
                 return webconfig_error_translate_to_ovsdb;
             }
+
+            // MLD_Addr
+            snprintf(vap_row->mld_addr, sizeof(vap_row->mld_addr), "%02x:%02x:%02x:%02x:%02x:%02x", vap->u.bss_info.mld_info.common_info.mld_addr[0],
+                    vap->u.bss_info.mld_info.common_info.mld_addr[1], vap->u.bss_info.mld_info.common_info.mld_addr[2],
+                    vap->u.bss_info.mld_info.common_info.mld_addr[3], vap->u.bss_info.mld_info.common_info.mld_addr[4],
+                    vap->u.bss_info.mld_info.common_info.mld_addr[5]);
+            wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Updating mld_addr to %s\n", __func__, __LINE__, vap_row->mld_addr);
 
             if (radio->oper.channel) {
                 wifi_util_dbg_print(WIFI_WEBCONFIG,"%s:%d: Updating Channel %d to %s\n", __func__, __LINE__,radio->oper.channel, vap->vap_name);

@@ -51,6 +51,9 @@ typedef struct _Sts__BSReport Sts__BSReport;
 typedef struct _Sts__RssiPeer Sts__RssiPeer;
 typedef struct _Sts__RssiPeer__RssiSample Sts__RssiPeer__RssiSample;
 typedef struct _Sts__RssiReport Sts__RssiReport;
+typedef struct _Sts__MLOClient Sts__MLOClient;
+typedef struct _Sts__MLOClient__LinkStats Sts__MLOClient__LinkStats;
+typedef struct _Sts__MLOClientReport Sts__MLOClientReport;
 typedef struct _Sts__Report Sts__Report;
 
 
@@ -1021,6 +1024,109 @@ struct  _Sts__RssiReport
  * Overall report that might contain all individual stats reports
  * //////////////////////////////////////////////////////////////////////////////
  */
+struct  _Sts__MLOClient__LinkStats
+{
+  ProtobufCMessage base;
+  Sts__RadioBandType band;
+  char *link_address;
+  protobuf_c_boolean has_association_link;
+  protobuf_c_boolean association_link;
+  char *wpa_key_mgmt;
+  char *pairwise_cipher;
+  protobuf_c_boolean has_rsn_capabilities;
+  uint32_t rsn_capabilities;
+  protobuf_c_boolean has_authentication_state;
+  protobuf_c_boolean authentication_state;
+  protobuf_c_boolean has_last_data_downlink_rate;
+  uint32_t last_data_downlink_rate;
+  protobuf_c_boolean has_last_data_uplink_rate;
+  uint32_t last_data_uplink_rate;
+  protobuf_c_boolean has_signal_strength;
+  int32_t signal_strength;
+  protobuf_c_boolean has_retransmissions;
+  uint32_t retransmissions;
+  protobuf_c_boolean has_active;
+  protobuf_c_boolean active;
+  char *operating_standard;
+  char *operating_channel_bandwidth;
+  protobuf_c_boolean has_snr;
+  int32_t snr;
+  char *interference_sources;
+  protobuf_c_boolean has_data_frames_sent_ack;
+  uint64_t data_frames_sent_ack;
+  protobuf_c_boolean has_data_frames_sent_no_ack;
+  uint64_t data_frames_sent_no_ack;
+  protobuf_c_boolean has_bytes_sent;
+  uint64_t bytes_sent;
+  protobuf_c_boolean has_bytes_received;
+  uint64_t bytes_received;
+  protobuf_c_boolean has_rssi;
+  int32_t rssi;
+  protobuf_c_boolean has_min_rssi;
+  int32_t min_rssi;
+  protobuf_c_boolean has_max_rssi;
+  int32_t max_rssi;
+  protobuf_c_boolean has_disassociations;
+  uint32_t disassociations;
+  protobuf_c_boolean has_authentication_failures;
+  uint32_t authentication_failures;
+  protobuf_c_boolean has_active_num_spatial_streams;
+  uint32_t active_num_spatial_streams;
+  protobuf_c_boolean has_packets_sent;
+  uint64_t packets_sent;
+  protobuf_c_boolean has_packets_received;
+  uint64_t packets_received;
+  protobuf_c_boolean has_errors_sent;
+  uint64_t errors_sent;
+  protobuf_c_boolean has_retrans_count;
+  uint64_t retrans_count;
+  protobuf_c_boolean has_failed_retrans_count;
+  uint64_t failed_retrans_count;
+  protobuf_c_boolean has_retry_count;
+  uint64_t retry_count;
+  protobuf_c_boolean has_multiple_retry_count;
+  uint64_t multiple_retry_count;
+  protobuf_c_boolean has_max_uplink_rate;
+  uint32_t max_uplink_rate;
+  protobuf_c_boolean has_max_downlink_rate;
+  uint32_t max_downlink_rate;
+  protobuf_c_boolean has_last_connect_time;
+  uint32_t last_connect_time;
+  protobuf_c_boolean has_ml_capabilities;
+  uint32_t ml_capabilities;
+  protobuf_c_boolean has_tid_link_map_negotiation;
+  uint32_t tid_link_map_negotiation;
+};
+#define STS__MLOCLIENT__LINK_STATS__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&sts__mloclient__link_stats__descriptor) \
+    , STS__RADIO_BAND_TYPE__BAND2G, NULL, 0, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+
+
+struct  _Sts__MLOClient
+{
+  ProtobufCMessage base;
+  char *mac_address;
+  size_t n_link_stats;
+  Sts__MLOClient__LinkStats **link_stats;
+};
+#define STS__MLOCLIENT__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&sts__mloclient__descriptor) \
+    , NULL, 0,NULL }
+
+
+struct  _Sts__MLOClientReport
+{
+  ProtobufCMessage base;
+  protobuf_c_boolean has_timestamp_ms;
+  uint64_t timestamp_ms;
+  size_t n_client_list;
+  Sts__MLOClient **client_list;
+};
+#define STS__MLOCLIENT_REPORT__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&sts__mloclient_report__descriptor) \
+    , 0, 0, 0,NULL }
+
+
 struct  _Sts__Report
 {
   ProtobufCMessage base;
@@ -1041,10 +1147,12 @@ struct  _Sts__Report
   Sts__RssiReport **rssi_report;
   size_t n_client_auth_fails_report;
   Sts__ClientAuthFailsReport **client_auth_fails_report;
+  size_t n_mlo_clients;
+  Sts__MLOClientReport **mlo_clients;
 };
 #define STS__REPORT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&sts__report__descriptor) \
-    , NULL, 0,NULL, 0,NULL, 0,NULL, 0,NULL, 0,NULL, 0,NULL, 0,NULL, 0,NULL }
+     , NULL, 0,NULL, 0,NULL, 0,NULL, 0,NULL, 0,NULL, 0,NULL, 0,NULL, 0,NULL, 0,NULL }
 
 
 /* Sts__AvgType methods */
@@ -1188,6 +1296,48 @@ Sts__ClientAuthFailsReport *
 void   sts__client_auth_fails_report__free_unpacked
                      (Sts__ClientAuthFailsReport *message,
                       ProtobufCAllocator *allocator);
+/* Sts__MLOClient__LinkStats methods */
+void   sts__mloclient__link_stats__init
+                     (Sts__MLOClient__LinkStats         *message);
+/* Sts__MLOClient methods */
+void   sts__mloclient__init
+                     (Sts__MLOClient         *message);
+size_t sts__mloclient__get_packed_size
+                     (const Sts__MLOClient   *message);
+size_t sts__mloclient__pack
+                     (const Sts__MLOClient   *message,
+                      uint8_t             *out);
+size_t sts__mloclient__pack_to_buffer
+                     (const Sts__MLOClient   *message,
+                      ProtobufCBuffer     *buffer);
+Sts__MLOClient *
+       sts__mloclient__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   sts__mloclient__free_unpacked
+                     (Sts__MLOClient *message,
+                      ProtobufCAllocator *allocator);
+/* Sts__MLOClientReport methods */
+void   sts__mloclient_report__init
+                     (Sts__MLOClientReport         *message);
+size_t sts__mloclient_report__get_packed_size
+                     (const Sts__MLOClientReport   *message);
+size_t sts__mloclient_report__pack
+                     (const Sts__MLOClientReport   *message,
+                      uint8_t             *out);
+size_t sts__mloclient_report__pack_to_buffer
+                     (const Sts__MLOClientReport   *message,
+                      ProtobufCBuffer     *buffer);
+Sts__MLOClientReport *
+       sts__mloclient_report__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   sts__mloclient_report__free_unpacked
+                     (Sts__MLOClientReport *message,
+                      ProtobufCAllocator *allocator);
+
 /* Sts__Survey__SurveySample methods */
 void   sts__survey__survey_sample__init
                      (Sts__Survey__SurveySample         *message);
@@ -1549,6 +1699,9 @@ extern const ProtobufCMessageDescriptor sts__rssi_peer__descriptor;
 extern const ProtobufCMessageDescriptor sts__rssi_peer__rssi_sample__descriptor;
 extern const ProtobufCEnumDescriptor    sts__rssi_peer__rssi_source__descriptor;
 extern const ProtobufCMessageDescriptor sts__rssi_report__descriptor;
+extern const ProtobufCMessageDescriptor sts__mloclient__descriptor;
+extern const ProtobufCMessageDescriptor sts__mloclient__link_stats__descriptor;
+extern const ProtobufCMessageDescriptor sts__mloclient_report__descriptor;
 extern const ProtobufCMessageDescriptor sts__report__descriptor;
 
 PROTOBUF_C__END_DECLS

@@ -808,6 +808,11 @@ void wifi_util_print(wifi_log_level_t level, wifi_dbg_type_t module, const char 
         snprintf(module_filename, sizeof(module_filename), "wifiSM");
         break;
     }
+    case WIFI_QM: {
+        snprintf(filename_dbg_enable, sizeof(filename_dbg_enable), LOG_PATH_PREFIX "wifiQM");
+        snprintf(module_filename, sizeof(module_filename), "wifiQM");
+        break;
+    }
     case WIFI_EM: {
         snprintf(filename_dbg_enable, sizeof(filename_dbg_enable), LOG_PATH_PREFIX "wifiEM");
         snprintf(module_filename, sizeof(module_filename), "wifiEM");

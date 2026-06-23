@@ -36,6 +36,7 @@
 #include "dpp_device.h"
 #include "dpp_capacity.h"
 #include "dpp_bs_client.h"
+#include "dpp_mlo_client.h"
 
 #ifndef TARGET_NATIVE
 #include "os_types.h"
@@ -57,6 +58,7 @@ typedef enum
     DPP_T_BS_CLIENT = 6,
     DPP_T_RSSI      = 7,
     DPP_T_CLIENT_AUTH_FAILS = 8,
+    DPP_T_MLO_CLIENT = 9,
 } DPP_STS_TYPE;
 
 uint32_t queue_depth;
@@ -152,6 +154,15 @@ typedef struct dppline_client_auth_fails_client_rec
     uint32_t                         invalid_psk;
 } dppline_client_auth_fails_client_rec_t;
 
+typedef struct dpp_mlo_client_stats
+{
+    dpp_mlo_client_report_data_t         report_data;
+    dpp_mlo_client_record_t             *records;
+    dpp_mlo_client_link_stats_t        **link_stats;
+    uint32_t                            *link_stats_qty;
+    uint32_t                             qty;
+} dppline_mlo_client_stats_t;
+
 typedef struct dppline_client_auth_fails_bss_rec
 {
     ifname_t                                if_name;
@@ -182,6 +193,7 @@ typedef struct dpp_stats
         dppline_bs_client_stats_t   bs_client;
         dppline_rssi_stats_t        rssi;
         dppline_client_auth_fails_stats_t client_auth_fails;
+        dppline_mlo_client_stats_t  mlo_client;
     } u;
 } dppline_stats_t;
 
@@ -265,6 +277,15 @@ static void dppline_free_stat(dppline_stats_t * s)
                     free(s->u.client_auth_fails.list[i].list);
                 }
                 free(s->u.client_auth_fails.list);
+                break;
+            case DPP_T_MLO_CLIENT:
+                for (i=0; i < s->u.mlo_client.qty; i++)
+                {
+                    free(s->u.mlo_client.link_stats[i]);
+                }
+                free(s->u.mlo_client.link_stats);
+                free(s->u.mlo_client.link_stats_qty);
+                free(s->u.mlo_client.records);
                 break;
             default:;
         }
@@ -619,6 +640,63 @@ static bool dppline_copysts(dppline_stats_t * dst, void * sts)
                     dppline_unshare_assoc_ies(&dst->u.bs_client.list[count]);
                     count++;
                 }
+            }
+            break;
+
+        case DPP_T_MLO_CLIENT:
+            {
+                dpp_mlo_client_report_data_t    *report_data = sts;
+                dpp_mlo_client_record_t         *rec = NULL;
+                dpp_mlo_client_link_stats_t     *ls = NULL;
+                uint32_t                         rec_idx = 0;
+                uint32_t                         ls_idx = 0;
+
+                dst->u.mlo_client.report_data.timestamp_ms = report_data->timestamp_ms;
+                dst->u.mlo_client.qty = 0;
+
+                /* Count records */
+                ds_dlist_foreach(&report_data->list, rec) {
+                    dst->u.mlo_client.qty++;
+                }
+
+                if (!dst->u.mlo_client.qty) break;
+
+                dst->u.mlo_client.records = calloc(dst->u.mlo_client.qty,
+                        sizeof(dpp_mlo_client_record_t));
+                dst->u.mlo_client.link_stats = calloc(dst->u.mlo_client.qty,
+                        sizeof(dpp_mlo_client_link_stats_t *));
+                dst->u.mlo_client.link_stats_qty = calloc(dst->u.mlo_client.qty,
+                        sizeof(uint32_t));
+
+                rec_idx = 0;
+                ds_dlist_foreach(&report_data->list, rec) {
+                    memcpy(dst->u.mlo_client.records[rec_idx].mac_address,
+                           rec->mac_address, sizeof(mac_address_t));
+
+                    /* Count link stats for this record */
+                    dst->u.mlo_client.link_stats_qty[rec_idx] = 0;
+                    ds_dlist_foreach(&rec->link_stats, ls) {
+                        dst->u.mlo_client.link_stats_qty[rec_idx]++;
+                    }
+
+                    if (dst->u.mlo_client.link_stats_qty[rec_idx]) {
+                        dst->u.mlo_client.link_stats[rec_idx] = calloc(
+                                dst->u.mlo_client.link_stats_qty[rec_idx],
+                                sizeof(dpp_mlo_client_link_stats_t));
+
+                        ls_idx = 0;
+                        ds_dlist_foreach(&rec->link_stats, ls) {
+                            memcpy(&dst->u.mlo_client.link_stats[rec_idx][ls_idx],
+                                   ls, sizeof(dpp_mlo_client_link_stats_t));
+                            ls_idx++;
+                        }
+                    }
+
+                    size += dst->u.mlo_client.link_stats_qty[rec_idx] *
+                            sizeof(dpp_mlo_client_link_stats_t);
+                    rec_idx++;
+                }
+                size += dst->u.mlo_client.qty * sizeof(dpp_mlo_client_record_t);
             }
             break;
 
@@ -2078,6 +2156,280 @@ static void dppline_add_stat_client_auth_fails(Sts__Report *r, dppline_stats_t *
     }
 }
 
+static Sts__MLOClientReport *dpp_mlo_client_report_encode(dpp_mlo_client_report_data_t *rpt)
+{
+    Sts__MLOClientReport *pb_report;
+    dpp_mlo_client_record_t *rec;
+    ds_dlist_iter_t rec_iter;
+    uint32_t n_clients = 0;
+    uint32_t i;
+
+    pb_report = malloc(sizeof(*pb_report));
+    assert(pb_report);
+    sts__mloclient_report__init(pb_report);
+
+    if (rpt->timestamp_ms) {
+        pb_report->timestamp_ms = rpt->timestamp_ms;
+        pb_report->has_timestamp_ms = true;
+    }
+
+    /* Count clients */
+    ds_dlist_foreach_iter(&rpt->list, rec, rec_iter) {
+        n_clients++;
+    }
+
+    if (!n_clients) return pb_report;
+
+    pb_report->client_list = calloc(n_clients, sizeof(Sts__MLOClient *));
+    assert(pb_report->client_list);
+    pb_report->n_client_list = n_clients;
+
+    i = 0;
+    ds_dlist_foreach_iter(&rpt->list, rec, rec_iter) {
+        Sts__MLOClient *pb_client;
+        dpp_mlo_client_link_stats_t *ls;
+        ds_dlist_iter_t ls_iter;
+        uint32_t n_links = 0;
+        uint32_t j;
+
+        pb_client = malloc(sizeof(*pb_client));
+        assert(pb_client);
+        sts__mloclient__init(pb_client);
+
+        pb_client->mac_address = malloc(18); /* "XX:XX:XX:XX:XX:XX\0" */
+        assert(pb_client->mac_address);
+        dpp_mac_to_str(rec->mac_address, pb_client->mac_address);
+
+        /* Count link stats */
+        ds_dlist_foreach_iter(&rec->link_stats, ls, ls_iter) {
+            n_links++;
+        }
+
+        if (n_links) {
+            pb_client->link_stats = calloc(n_links, sizeof(Sts__MLOClient__LinkStats *));
+            assert(pb_client->link_stats);
+            pb_client->n_link_stats = n_links;
+
+            j = 0;
+            ds_dlist_foreach_iter(&rec->link_stats, ls, ls_iter) {
+                Sts__MLOClient__LinkStats *pb_ls;
+
+                pb_ls = malloc(sizeof(*pb_ls));
+                assert(pb_ls);
+                sts__mloclient__link_stats__init(pb_ls);
+
+                pb_ls->band = dppline_to_proto_radio(ls->band);
+
+                pb_ls->link_address = malloc(18);
+                assert(pb_ls->link_address);
+                dpp_mac_to_str(ls->link_address, pb_ls->link_address);
+
+                pb_ls->has_association_link = true;
+                pb_ls->association_link = ls->association_link;
+
+                if (ls->wpa_key_mgmt[0]) {
+                    pb_ls->wpa_key_mgmt = strdup(ls->wpa_key_mgmt);
+                }
+                if (ls->pairwise_cipher[0]) {
+                    pb_ls->pairwise_cipher = strdup(ls->pairwise_cipher);
+                }
+                if (ls->rsn_capabilities) {
+                    pb_ls->has_rsn_capabilities = true;
+                    pb_ls->rsn_capabilities = ls->rsn_capabilities;
+                }
+                pb_ls->has_authentication_state = true;
+                pb_ls->authentication_state = ls->authentication_state;
+
+                if (ls->last_data_downlink_rate) {
+                    pb_ls->has_last_data_downlink_rate = true;
+                    pb_ls->last_data_downlink_rate = ls->last_data_downlink_rate;
+                }
+                if (ls->last_data_uplink_rate) {
+                    pb_ls->has_last_data_uplink_rate = true;
+                    pb_ls->last_data_uplink_rate = ls->last_data_uplink_rate;
+                }
+                if (ls->signal_strength) {
+                    pb_ls->has_signal_strength = true;
+                    pb_ls->signal_strength = ls->signal_strength;
+                }
+                if (ls->retransmissions) {
+                    pb_ls->has_retransmissions = true;
+                    pb_ls->retransmissions = ls->retransmissions;
+                }
+                pb_ls->has_active = true;
+                pb_ls->active = ls->active;
+
+                if (ls->operating_standard[0]) {
+                    pb_ls->operating_standard = strdup(ls->operating_standard);
+                }
+                if (ls->operating_channel_bandwidth[0]) {
+                    pb_ls->operating_channel_bandwidth = strdup(ls->operating_channel_bandwidth);
+                }
+                if (ls->snr) {
+                    pb_ls->has_snr = true;
+                    pb_ls->snr = ls->snr;
+                }
+                if (ls->interference_sources[0]) {
+                    pb_ls->interference_sources = strdup(ls->interference_sources);
+                }
+                if (ls->data_frames_sent_ack) {
+                    pb_ls->has_data_frames_sent_ack = true;
+                    pb_ls->data_frames_sent_ack = ls->data_frames_sent_ack;
+                }
+                if (ls->data_frames_sent_no_ack) {
+                    pb_ls->has_data_frames_sent_no_ack = true;
+                    pb_ls->data_frames_sent_no_ack = ls->data_frames_sent_no_ack;
+                }
+                if (ls->bytes_sent) {
+                    pb_ls->has_bytes_sent = true;
+                    pb_ls->bytes_sent = ls->bytes_sent;
+                }
+                if (ls->bytes_received) {
+                    pb_ls->has_bytes_received = true;
+                    pb_ls->bytes_received = ls->bytes_received;
+                }
+                if (ls->rssi) {
+                    pb_ls->has_rssi = true;
+                    pb_ls->rssi = ls->rssi;
+                }
+                if (ls->min_rssi) {
+                    pb_ls->has_min_rssi = true;
+                    pb_ls->min_rssi = ls->min_rssi;
+                }
+                if (ls->max_rssi) {
+                    pb_ls->has_max_rssi = true;
+                    pb_ls->max_rssi = ls->max_rssi;
+                }
+                if (ls->disassociations) {
+                    pb_ls->has_disassociations = true;
+                    pb_ls->disassociations = ls->disassociations;
+                }
+                if (ls->authentication_failures) {
+                    pb_ls->has_authentication_failures = true;
+                    pb_ls->authentication_failures = ls->authentication_failures;
+                }
+                if (ls->active_num_spatial_streams) {
+                    pb_ls->has_active_num_spatial_streams = true;
+                    pb_ls->active_num_spatial_streams = ls->active_num_spatial_streams;
+                }
+                if (ls->packets_sent) {
+                    pb_ls->has_packets_sent = true;
+                    pb_ls->packets_sent = ls->packets_sent;
+                }
+                if (ls->packets_received) {
+                    pb_ls->has_packets_received = true;
+                    pb_ls->packets_received = ls->packets_received;
+                }
+                if (ls->errors_sent) {
+                    pb_ls->has_errors_sent = true;
+                    pb_ls->errors_sent = ls->errors_sent;
+                }
+                if (ls->retrans_count) {
+                    pb_ls->has_retrans_count = true;
+                    pb_ls->retrans_count = ls->retrans_count;
+                }
+                if (ls->failed_retrans_count) {
+                    pb_ls->has_failed_retrans_count = true;
+                    pb_ls->failed_retrans_count = ls->failed_retrans_count;
+                }
+                if (ls->retry_count) {
+                    pb_ls->has_retry_count = true;
+                    pb_ls->retry_count = ls->retry_count;
+                }
+                if (ls->multiple_retry_count) {
+                    pb_ls->has_multiple_retry_count = true;
+                    pb_ls->multiple_retry_count = ls->multiple_retry_count;
+                }
+                if (ls->max_uplink_rate) {
+                    pb_ls->has_max_uplink_rate = true;
+                    pb_ls->max_uplink_rate = ls->max_uplink_rate;
+                }
+                if (ls->max_downlink_rate) {
+                    pb_ls->has_max_downlink_rate = true;
+                    pb_ls->max_downlink_rate = ls->max_downlink_rate;
+                }
+                if (ls->last_connect_time) {
+                    pb_ls->has_last_connect_time = true;
+                    pb_ls->last_connect_time = ls->last_connect_time;
+                }
+                if (ls->ml_capabilities) {
+                    pb_ls->has_ml_capabilities = true;
+                    pb_ls->ml_capabilities = ls->ml_capabilities;
+                }
+                if (ls->tid_link_map_negotiation) {
+                    pb_ls->has_tid_link_map_negotiation = true;
+                    pb_ls->tid_link_map_negotiation = ls->tid_link_map_negotiation;
+                }
+
+                pb_client->link_stats[j] = pb_ls;
+                j++;
+            }
+        }
+
+        pb_report->client_list[i] = pb_client;
+        i++;
+    }
+
+    return pb_report;
+}
+
+static void dppline_add_stat_mlo_client(Sts__Report *r, dppline_stats_t *s)
+{
+    dppline_mlo_client_stats_t *mlo = &s->u.mlo_client;
+    dpp_mlo_client_report_data_t report_data;
+    dpp_mlo_client_record_t *records = NULL;
+    dpp_mlo_client_link_stats_t **link_stats_arrays = NULL;
+    Sts__MLOClientReport *pb_report;
+    uint32_t i;
+    uint32_t j;
+
+    /* Reconstruct the report data with linked lists for encoding */
+    report_data.timestamp_ms = mlo->report_data.timestamp_ms;
+    ds_dlist_init(&report_data.list, dpp_mlo_client_record_t, node);
+
+    records = calloc(mlo->qty, sizeof(dpp_mlo_client_record_t));
+    assert(records);
+    link_stats_arrays = calloc(mlo->qty, sizeof(dpp_mlo_client_link_stats_t *));
+    assert(link_stats_arrays);
+
+    for (i = 0; i < mlo->qty; i++) {
+        memcpy(records[i].mac_address, mlo->records[i].mac_address,
+               sizeof(mac_address_t));
+        ds_dlist_init(&records[i].link_stats, dpp_mlo_client_link_stats_t, node);
+
+        if (mlo->link_stats_qty[i]) {
+            link_stats_arrays[i] = calloc(mlo->link_stats_qty[i],
+                    sizeof(dpp_mlo_client_link_stats_t));
+            assert(link_stats_arrays[i]);
+
+            for (j = 0; j < mlo->link_stats_qty[i]; j++) {
+                memcpy(&link_stats_arrays[i][j], &mlo->link_stats[i][j],
+                       sizeof(dpp_mlo_client_link_stats_t));
+                ds_dlist_insert_tail(&records[i].link_stats,
+                                    &link_stats_arrays[i][j]);
+            }
+        }
+
+        ds_dlist_insert_tail(&report_data.list, &records[i]);
+    }
+
+    /* Encode using the existing encoder */
+    pb_report = dpp_mlo_client_report_encode(&report_data);
+
+    /* Add to report */
+    r->n_mlo_clients++;
+    r->mlo_clients = realloc(r->mlo_clients,
+            r->n_mlo_clients * sizeof(Sts__MLOClientReport *));
+    r->mlo_clients[r->n_mlo_clients - 1] = pb_report;
+
+    /* Free temporary reconstruction structures */
+    for (i = 0; i < mlo->qty; i++) {
+        free(link_stats_arrays[i]);
+    }
+    free(link_stats_arrays);
+    free(records);
+}
+
 static void dppline_add_stat(Sts__Report * r, dppline_stats_t * s)
 {
     switch(s->type)
@@ -2104,6 +2456,10 @@ static void dppline_add_stat(Sts__Report * r, dppline_stats_t * s)
 
         case DPP_T_BS_CLIENT:
             dppline_add_stat_bs_client(r, s);
+            break;
+
+        case DPP_T_MLO_CLIENT:
+            dppline_add_stat_mlo_client(r, s);
             break;
 
         case DPP_T_RSSI:
@@ -2201,13 +2557,22 @@ static bool dppline_put(DPP_STS_TYPE type, void * rpt)
 /* Initialize library     */
 bool dpp_init()
 {
-    LOG(INFO,
-        "Initializing DPP library.\n");
+    static bool is_initialized = false;
+
+    if (is_initialized) {
+        LOG(INFO,
+            "The DPP library already has been initialized.\n");
+        return true;
+    } else {
+        LOG(INFO,
+            "Initializing DPP library.\n");
+    }
 
     ds_dlist_init(&g_dppline_list, struct dpp_stats, dnode);
 
     /* reset the queue depth counter    */
     queue_depth = 0;
+    is_initialized = true;
 
     return true;
 }
@@ -2250,6 +2615,11 @@ bool dpp_put_client(dpp_client_report_data_t *rpt)
 bool dpp_put_device(dpp_device_report_data_t * rpt)
 {
     return dppline_put(DPP_T_DEVICE, rpt);
+}
+
+bool dpp_put_mlo_client(dpp_mlo_client_report_data_t *rpt)
+{
+    return dppline_put(DPP_T_MLO_CLIENT, rpt);
 }
 
 bool dpp_put_bs_client(dpp_bs_client_report_data_t *rpt)

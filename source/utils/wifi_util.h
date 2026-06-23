@@ -110,6 +110,7 @@ typedef enum {
     WIFI_SERVICES,
     WIFI_HARVESTER,
     WIFI_SM,
+    WIFI_QM,
     WIFI_EM,
     WIFI_BLASTER,
     WIFI_OCS,

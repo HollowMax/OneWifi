@@ -33,6 +33,7 @@ extern "C" {
 #include "wifi_cac.h"
 #endif
 #include "wifi_sm.h"
+#include "wifi_qm.h"
 #include "wifi_motion.h"
 #include "wifi_csi.h"
 #ifdef ONEWIFI_CSI_APP_SUPPORT

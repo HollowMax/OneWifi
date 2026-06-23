@@ -61,6 +61,7 @@ extern "C" {
 
 
 /* conversion */
+radio_type_t radio_index_to_dpp_radio_type(unsigned int radio_index);
 radio_type_t freq_band_to_dpp_radio_type(wifi_freq_bands_t freq_band);
 report_type_t reporting_type_to_dpp_report_type(reporting_type_t report_type);
 radio_scan_type_t survey_type_to_dpp_scan_type(survey_type_t survey_type);

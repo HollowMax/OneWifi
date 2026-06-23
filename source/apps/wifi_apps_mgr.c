@@ -166,7 +166,7 @@ int apps_mgr_analytics_event(wifi_apps_mgr_t *apps_mgr, wifi_event_type_t type, 
     return RETURN_OK;
 }
 
-int apps_mgr_sm_event(wifi_apps_mgr_t *apps_mgr, wifi_event_type_t type, wifi_event_subtype_t sub_type, void *arg)
+int apps_mgr_app_event(wifi_apps_mgr_t *apps_mgr, wifi_event_type_t type, wifi_event_subtype_t sub_type, void *arg, wifi_app_inst_t app_inst)
 {
     wifi_event_t *event = (wifi_event_t *)malloc(sizeof(wifi_event_t));
     wifi_app_t  *app = NULL;
@@ -180,7 +180,7 @@ int apps_mgr_sm_event(wifi_apps_mgr_t *apps_mgr, wifi_event_type_t type, wifi_ev
     event->event_type = type;
     event->sub_type = sub_type;
 
-    app = get_app_by_inst(apps_mgr, wifi_app_inst_sm);
+    app = get_app_by_inst(apps_mgr, app_inst);
 
     if (app == NULL) {
         wifi_util_error_print(WIFI_APPS, "%s %d assert - NULL Pointer\n", __FUNCTION__, __LINE__);

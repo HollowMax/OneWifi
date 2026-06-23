@@ -331,6 +331,102 @@ void   sts__client_auth_fails_report__free_unpacked
   assert(message->base.descriptor == &sts__client_auth_fails_report__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
+void   sts__mloclient__link_stats__init
+                     (Sts__MLOClient__LinkStats         *message)
+{
+  static const Sts__MLOClient__LinkStats init_value = STS__MLOCLIENT__LINK_STATS__INIT;
+  *message = init_value;
+}
+void   sts__mloclient__init
+                     (Sts__MLOClient         *message)
+{
+  static const Sts__MLOClient init_value = STS__MLOCLIENT__INIT;
+  *message = init_value;
+}
+size_t sts__mloclient__get_packed_size
+                     (const Sts__MLOClient *message)
+{
+  assert(message->base.descriptor == &sts__mloclient__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t sts__mloclient__pack
+                     (const Sts__MLOClient *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &sts__mloclient__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t sts__mloclient__pack_to_buffer
+                     (const Sts__MLOClient *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &sts__mloclient__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+Sts__MLOClient *
+       sts__mloclient__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (Sts__MLOClient *)
+     protobuf_c_message_unpack (&sts__mloclient__descriptor,
+                                allocator, len, data);
+}
+void   sts__mloclient__free_unpacked
+                     (Sts__MLOClient *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &sts__mloclient__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   sts__mloclient_report__init
+                     (Sts__MLOClientReport         *message)
+{
+  static const Sts__MLOClientReport init_value = STS__MLOCLIENT_REPORT__INIT;
+  *message = init_value;
+}
+size_t sts__mloclient_report__get_packed_size
+                     (const Sts__MLOClientReport *message)
+{
+  assert(message->base.descriptor == &sts__mloclient_report__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t sts__mloclient_report__pack
+                     (const Sts__MLOClientReport *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &sts__mloclient_report__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t sts__mloclient_report__pack_to_buffer
+                     (const Sts__MLOClientReport *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &sts__mloclient_report__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+Sts__MLOClientReport *
+       sts__mloclient_report__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (Sts__MLOClientReport *)
+     protobuf_c_message_unpack (&sts__mloclient_report__descriptor,
+                                allocator, len, data);
+}
+void   sts__mloclient_report__free_unpacked
+                     (Sts__MLOClientReport *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &sts__mloclient_report__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
 void   sts__survey__survey_sample__init
                      (Sts__Survey__SurveySample         *message)
 {
@@ -4578,7 +4674,628 @@ const ProtobufCMessageDescriptor sts__rssi_report__descriptor =
   (ProtobufCMessageInit) sts__rssi_report__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor sts__report__field_descriptors[9] =
+static const ProtobufCFieldDescriptor sts__mloclient__link_stats__field_descriptors[38] =
+{
+  {
+    "band",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(Sts__MLOClient__LinkStats, band),
+    &sts__radio_band_type__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "link_address",
+    2,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(Sts__MLOClient__LinkStats, link_address),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "association_link",
+    3,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_BOOL,
+    offsetof(Sts__MLOClient__LinkStats, has_association_link),
+    offsetof(Sts__MLOClient__LinkStats, association_link),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "wpa_key_mgmt",
+    4,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(Sts__MLOClient__LinkStats, wpa_key_mgmt),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "pairwise_cipher",
+    5,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(Sts__MLOClient__LinkStats, pairwise_cipher),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "rsn_capabilities",
+    6,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Sts__MLOClient__LinkStats, has_rsn_capabilities),
+    offsetof(Sts__MLOClient__LinkStats, rsn_capabilities),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "authentication_state",
+    7,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_BOOL,
+    offsetof(Sts__MLOClient__LinkStats, has_authentication_state),
+    offsetof(Sts__MLOClient__LinkStats, authentication_state),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "last_data_downlink_rate",
+    8,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Sts__MLOClient__LinkStats, has_last_data_downlink_rate),
+    offsetof(Sts__MLOClient__LinkStats, last_data_downlink_rate),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "last_data_uplink_rate",
+    9,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Sts__MLOClient__LinkStats, has_last_data_uplink_rate),
+    offsetof(Sts__MLOClient__LinkStats, last_data_uplink_rate),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "signal_strength",
+    10,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(Sts__MLOClient__LinkStats, has_signal_strength),
+    offsetof(Sts__MLOClient__LinkStats, signal_strength),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "retransmissions",
+    11,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Sts__MLOClient__LinkStats, has_retransmissions),
+    offsetof(Sts__MLOClient__LinkStats, retransmissions),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "active",
+    12,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_BOOL,
+    offsetof(Sts__MLOClient__LinkStats, has_active),
+    offsetof(Sts__MLOClient__LinkStats, active),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "operating_standard",
+    13,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(Sts__MLOClient__LinkStats, operating_standard),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "operating_channel_bandwidth",
+    14,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(Sts__MLOClient__LinkStats, operating_channel_bandwidth),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "snr",
+    15,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(Sts__MLOClient__LinkStats, has_snr),
+    offsetof(Sts__MLOClient__LinkStats, snr),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "interference_sources",
+    16,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(Sts__MLOClient__LinkStats, interference_sources),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "data_frames_sent_ack",
+    17,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT64,
+    offsetof(Sts__MLOClient__LinkStats, has_data_frames_sent_ack),
+    offsetof(Sts__MLOClient__LinkStats, data_frames_sent_ack),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "data_frames_sent_no_ack",
+    18,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT64,
+    offsetof(Sts__MLOClient__LinkStats, has_data_frames_sent_no_ack),
+    offsetof(Sts__MLOClient__LinkStats, data_frames_sent_no_ack),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "bytes_sent",
+    19,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT64,
+    offsetof(Sts__MLOClient__LinkStats, has_bytes_sent),
+    offsetof(Sts__MLOClient__LinkStats, bytes_sent),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "bytes_received",
+    20,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT64,
+    offsetof(Sts__MLOClient__LinkStats, has_bytes_received),
+    offsetof(Sts__MLOClient__LinkStats, bytes_received),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "rssi",
+    21,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(Sts__MLOClient__LinkStats, has_rssi),
+    offsetof(Sts__MLOClient__LinkStats, rssi),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "min_rssi",
+    22,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(Sts__MLOClient__LinkStats, has_min_rssi),
+    offsetof(Sts__MLOClient__LinkStats, min_rssi),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "max_rssi",
+    23,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    offsetof(Sts__MLOClient__LinkStats, has_max_rssi),
+    offsetof(Sts__MLOClient__LinkStats, max_rssi),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "disassociations",
+    24,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Sts__MLOClient__LinkStats, has_disassociations),
+    offsetof(Sts__MLOClient__LinkStats, disassociations),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "authentication_failures",
+    25,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Sts__MLOClient__LinkStats, has_authentication_failures),
+    offsetof(Sts__MLOClient__LinkStats, authentication_failures),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "active_num_spatial_streams",
+    26,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Sts__MLOClient__LinkStats, has_active_num_spatial_streams),
+    offsetof(Sts__MLOClient__LinkStats, active_num_spatial_streams),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "packets_sent",
+    27,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT64,
+    offsetof(Sts__MLOClient__LinkStats, has_packets_sent),
+    offsetof(Sts__MLOClient__LinkStats, packets_sent),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "packets_received",
+    28,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT64,
+    offsetof(Sts__MLOClient__LinkStats, has_packets_received),
+    offsetof(Sts__MLOClient__LinkStats, packets_received),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "errors_sent",
+    29,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT64,
+    offsetof(Sts__MLOClient__LinkStats, has_errors_sent),
+    offsetof(Sts__MLOClient__LinkStats, errors_sent),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "retrans_count",
+    30,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT64,
+    offsetof(Sts__MLOClient__LinkStats, has_retrans_count),
+    offsetof(Sts__MLOClient__LinkStats, retrans_count),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "failed_retrans_count",
+    31,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT64,
+    offsetof(Sts__MLOClient__LinkStats, has_failed_retrans_count),
+    offsetof(Sts__MLOClient__LinkStats, failed_retrans_count),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "retry_count",
+    32,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT64,
+    offsetof(Sts__MLOClient__LinkStats, has_retry_count),
+    offsetof(Sts__MLOClient__LinkStats, retry_count),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "multiple_retry_count",
+    33,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT64,
+    offsetof(Sts__MLOClient__LinkStats, has_multiple_retry_count),
+    offsetof(Sts__MLOClient__LinkStats, multiple_retry_count),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "max_uplink_rate",
+    34,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Sts__MLOClient__LinkStats, has_max_uplink_rate),
+    offsetof(Sts__MLOClient__LinkStats, max_uplink_rate),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "max_downlink_rate",
+    35,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Sts__MLOClient__LinkStats, has_max_downlink_rate),
+    offsetof(Sts__MLOClient__LinkStats, max_downlink_rate),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "last_connect_time",
+    36,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Sts__MLOClient__LinkStats, has_last_connect_time),
+    offsetof(Sts__MLOClient__LinkStats, last_connect_time),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "ml_capabilities",
+    37,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Sts__MLOClient__LinkStats, has_ml_capabilities),
+    offsetof(Sts__MLOClient__LinkStats, ml_capabilities),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "tid_link_map_negotiation",
+    38,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT32,
+    offsetof(Sts__MLOClient__LinkStats, has_tid_link_map_negotiation),
+    offsetof(Sts__MLOClient__LinkStats, tid_link_map_negotiation),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned sts__mloclient__link_stats__field_indices_by_name[] = {
+  11,   /* field[11] = active */
+  25,   /* field[25] = active_num_spatial_streams */
+  2,    /* field[2] = association_link */
+  6,    /* field[6] = authentication_state */
+  24,   /* field[24] = authentication_failures */
+  0,    /* field[0] = band */
+  19,   /* field[19] = bytes_received */
+  18,   /* field[18] = bytes_sent */
+  16,   /* field[16] = data_frames_sent_ack */
+  17,   /* field[17] = data_frames_sent_no_ack */
+  23,   /* field[23] = disassociations */
+  28,   /* field[28] = errors_sent */
+  30,   /* field[30] = failed_retrans_count */
+  15,   /* field[15] = interference_sources */
+  35,   /* field[35] = last_connect_time */
+  7,    /* field[7] = last_data_downlink_rate */
+  8,    /* field[8] = last_data_uplink_rate */
+  1,    /* field[1] = link_address */
+  34,   /* field[34] = max_downlink_rate */
+  22,   /* field[22] = max_rssi */
+  33,   /* field[33] = max_uplink_rate */
+  21,   /* field[21] = min_rssi */
+  36,   /* field[36] = ml_capabilities */
+  32,   /* field[32] = multiple_retry_count */
+  13,   /* field[13] = operating_channel_bandwidth */
+  12,   /* field[12] = operating_standard */
+  27,   /* field[27] = packets_received */
+  26,   /* field[26] = packets_sent */
+  4,    /* field[4] = pairwise_cipher */
+  29,   /* field[29] = retrans_count */
+  10,   /* field[10] = retransmissions */
+  31,   /* field[31] = retry_count */
+  5,    /* field[5] = rsn_capabilities */
+  20,   /* field[20] = rssi */
+  9,    /* field[9] = signal_strength */
+  14,   /* field[14] = snr */
+  37,   /* field[37] = tid_link_map_negotiation */
+  3,    /* field[3] = wpa_key_mgmt */
+};
+static const ProtobufCIntRange sts__mloclient__link_stats__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 38 }
+};
+const ProtobufCMessageDescriptor sts__mloclient__link_stats__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "sts.MLOClient.LinkStats",
+  "LinkStats",
+  "Sts__MLOClient__LinkStats",
+  "sts",
+  sizeof(Sts__MLOClient__LinkStats),
+  38,
+  sts__mloclient__link_stats__field_descriptors,
+  sts__mloclient__link_stats__field_indices_by_name,
+  1,  sts__mloclient__link_stats__number_ranges,
+  (ProtobufCMessageInit) sts__mloclient__link_stats__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor sts__mloclient__field_descriptors[2] =
+{
+  {
+    "mac_address",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(Sts__MLOClient, mac_address),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "link_stats",
+    2,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Sts__MLOClient, n_link_stats),
+    offsetof(Sts__MLOClient, link_stats),
+    &sts__mloclient__link_stats__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned sts__mloclient__field_indices_by_name[] = {
+  1,   /* field[1] = link_stats */
+  0,   /* field[0] = mac_address */
+};
+static const ProtobufCIntRange sts__mloclient__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 2 }
+};
+const ProtobufCMessageDescriptor sts__mloclient__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "sts.MLOClient",
+  "MLOClient",
+  "Sts__MLOClient",
+  "sts",
+  sizeof(Sts__MLOClient),
+  2,
+  sts__mloclient__field_descriptors,
+  sts__mloclient__field_indices_by_name,
+  1,  sts__mloclient__number_ranges,
+  (ProtobufCMessageInit) sts__mloclient__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor sts__mloclient_report__field_descriptors[2] =
+{
+  {
+    "timestamp_ms",
+    1,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_UINT64,
+    offsetof(Sts__MLOClientReport, has_timestamp_ms),
+    offsetof(Sts__MLOClientReport, timestamp_ms),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "client_list",
+    2,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Sts__MLOClientReport, n_client_list),
+    offsetof(Sts__MLOClientReport, client_list),
+    &sts__mloclient__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned sts__mloclient_report__field_indices_by_name[] = {
+  1,   /* field[1] = client_list */
+  0,   /* field[0] = timestamp_ms */
+};
+static const ProtobufCIntRange sts__mloclient_report__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 2 }
+};
+const ProtobufCMessageDescriptor sts__mloclient_report__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "sts.MLOClientReport",
+  "MLOClientReport",
+  "Sts__MLOClientReport",
+  "sts",
+  sizeof(Sts__MLOClientReport),
+  2,
+  sts__mloclient_report__field_descriptors,
+  sts__mloclient_report__field_indices_by_name,
+  1,  sts__mloclient_report__number_ranges,
+  (ProtobufCMessageInit) sts__mloclient_report__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor sts__report__field_descriptors[10] =
 {
   {
     "nodeID",
@@ -4688,6 +5405,18 @@ static const ProtobufCFieldDescriptor sts__report__field_descriptors[9] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+    {
+    "mlo_clients",
+    10,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Sts__Report, n_mlo_clients),
+    offsetof(Sts__Report, mlo_clients),
+    &sts__mloclient_report__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned sts__report__field_indices_by_name[] = {
   6,   /* field[6] = bs_report */
@@ -4695,6 +5424,7 @@ static const unsigned sts__report__field_indices_by_name[] = {
   8,   /* field[8] = client_auth_fails_report */
   4,   /* field[4] = clients */
   5,   /* field[5] = device */
+  9,   /* field[9] = mlo_clients */
   3,   /* field[3] = neighbors */
   0,   /* field[0] = nodeID */
   7,   /* field[7] = rssi_report */
@@ -4703,7 +5433,7 @@ static const unsigned sts__report__field_indices_by_name[] = {
 static const ProtobufCIntRange sts__report__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 9 }
+  { 0, 10 }
 };
 const ProtobufCMessageDescriptor sts__report__descriptor =
 {
@@ -4713,7 +5443,7 @@ const ProtobufCMessageDescriptor sts__report__descriptor =
   "Sts__Report",
   "sts",
   sizeof(Sts__Report),
-  9,
+  10,
   sts__report__field_descriptors,
   sts__report__field_indices_by_name,
   1,  sts__report__number_ranges,

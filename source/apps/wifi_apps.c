@@ -350,6 +350,14 @@ wifi_app_descriptor_t app_desc[] = {
         link_quality_init, link_quality_event, link_quality_deinit,
         NULL, NULL
     },
+    {
+        wifi_app_inst_qm, 0,
+        wifi_event_type_webconfig,
+        true, true,
+        "Queue Manager",
+        qm_init, qm_event, qm_deinit,
+        NULL,NULL
+    },
 #if SM_APP
     {
         wifi_app_inst_sm, 0,

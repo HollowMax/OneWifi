@@ -3030,6 +3030,7 @@ webconfig_error_t webconfig_ctrl_apply(webconfig_subdoc_t *doc, webconfig_subdoc
                         ~ctrl_webconfig_state_associated_clients_full_cfg_rsp_pending;
                     ret = webconfig_client_notify_apply(ctrl, &data->u.encoded);
                 }
+                ret = apps_mgr_app_event(&ctrl->apps_mgr, wifi_event_type_webconfig, wifi_event_webconfig_get_data, (void *)data, wifi_app_inst_qm);
             } else {
                 wifi_util_error_print(WIFI_MGR,
                     "%s:%d: Not expected apply to associated clients webconfig subdoc\n", __func__,
@@ -3066,7 +3067,7 @@ webconfig_error_t webconfig_ctrl_apply(webconfig_subdoc_t *doc, webconfig_subdoc
                 wifi_util_dbg_print(WIFI_MGR, "%s:%d: stats config subdoc\n", __func__, __LINE__);
 #if SM_APP
                 wifi_util_dbg_print(WIFI_MGR, "%s:%d: sending config for handling by sm app\n", __func__, __LINE__);
-                ret = apps_mgr_sm_event(&ctrl->apps_mgr, wifi_event_type_webconfig, wifi_event_webconfig_set_data_ovsm, (void *)data);
+                ret = apps_mgr_app_event(&ctrl->apps_mgr, wifi_event_type_webconfig, wifi_event_webconfig_set_data_ovsm, (void *)data, wifi_app_inst_sm);
 #else
                 ret = webconfig_stats_config_apply(ctrl, &data->u.decoded);
 #endif

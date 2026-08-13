@@ -505,14 +505,14 @@ static int subscribe_to_mqtt_broker(void) {
 /**/
 int mqtt_msg_init(ev_timer *mqtt_timeout_watcher) {
     (void)mqtt_timeout_watcher;
-    wifi_util_dbg_print(WIFI_MON, "%s:%d\n", __func__, __LINE__);
-    wifi_util_error_print(WIFI_MON, "%s:%d\n", __func__, __LINE__);
+    /*wifi_util_dbg_print(WIFI_MON, "%s:%d\n", __func__, __LINE__);*/
+    /*wifi_util_error_print(WIFI_MON, "%s:%d\n", __func__, __LINE__);*/
     mosquitto_lib_init();
 
-    g_mosq = mosquitto_new(NULL, true, NULL);
+    /*g_mosq = mosquitto_new(NULL, true, NULL);*/
     if (!g_mosq)
     {
-        wifi_util_error_print(WIFI_MON, "%s:%d Failed to initialize Mosquitto library\n", __func__, __LINE__);
+        /*wifi_util_error_print(WIFI_MON, "%s:%d Failed to initialize Mosquitto library\n", __func__, __LINE__);*/
         return 1;
     }
 

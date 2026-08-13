@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdbool.h>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <unistd.h>
@@ -51,30 +50,14 @@ static int subscribe_to_mqtt_topic(const char *topic) {
 
 static int subscribe_to_mqtt_broker(void) {
     int rc = 0;
-    bool use_tls = true;
-    struct mqtt_broker_conf mqtt_broker_conf;
+    struct mqtt_broker_conf mqtt_broker_conf = {
+        .ip   = "mqtt.gw.broker",
+        .port = 8883,
+    };
 
     wifi_util_dbg_print(WIFI_MON, "%s:%d\n", __func__, __LINE__);
 
-    FILE *ca_cert = fopen(MQTT_TLS_CA_CERT_FILE, "r");
-    FILE *certfile = fopen(MQTT_TLS_CLIENT_CERT_FILE, "r");
-    FILE *keyfile = fopen(MQTT_TLS_CLIENT_KEY_FILE, "r");
-
-    if (ca_cert == NULL || certfile == NULL || keyfile == NULL)
-        use_tls = false;
-
-    if (ca_cert) fclose(ca_cert);
-    if (certfile) fclose(certfile);
-    if (keyfile) fclose(keyfile);
-
-    if (use_tls) {
-        mosquitto_tls_set(g_mqtt_client.mosq, MQTT_TLS_CA_CERT_FILE, NULL, MQTT_TLS_CLIENT_CERT_FILE, MQTT_TLS_CLIENT_KEY_FILE, NULL);
-        mqtt_broker_conf.ip = "mqtt.gw.broker";
-        mqtt_broker_conf.port = 8883;
-    } else {
-        mqtt_broker_conf.ip = "192.168.245.254"; // You can change it to your GW IP
-        mqtt_broker_conf.port = 1883;
-    }
+    mosquitto_tls_set(g_mqtt_client.mosq, MQTT_TLS_CA_CERT_FILE, NULL, MQTT_TLS_CLIENT_CERT_FILE, MQTT_TLS_CLIENT_KEY_FILE, NULL);
 
     wifi_util_dbg_print(WIFI_MON, "%s:%d Connecting to mqtt broker: ip: %s, port: %d\n", __func__, __LINE__, mqtt_broker_conf.ip, mqtt_broker_conf.port);
     rc = mosquitto_connect(g_mqtt_client.mosq, mqtt_broker_conf.ip, mqtt_broker_conf.port, MQTT_KEEPALIVE_TIME);

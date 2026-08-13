@@ -160,9 +160,11 @@ struct rsn_data {
 bool monitor_initialization_done;
 
 static events_monitor_t g_events_monitor;
-static struct mosquitto *g_mosq = NULL;
-static pthread_t g_mqtt_loop_thr;
-static atomic_bool g_mqtt_loop_running = false;
+static struct {
+    struct mosquitto *mosq;
+    pthread_t         msg_polling_thread;
+    atomic_bool       is_msg_polling_running;
+} g_mqtt_client = { .mosq = NULL, .is_msg_polling_running = false };
 
 int harvester_get_associated_device_info(int vap_index, char **harvester_buf);
 hash_map_t *get_sta_data_map(unsigned int vap_index);
@@ -419,7 +421,7 @@ static int subscribe_to_mqtt_topic(const char *topic) {
     int rc;
 
     wifi_util_dbg_print(WIFI_MON, "%s:%d Subscribing to MQTT topic: %s\n", __func__, __LINE__, topic);
-    rc = mosquitto_subscribe(g_mosq, NULL, topic, 0);
+    rc = mosquitto_subscribe(g_mqtt_client.mosq, NULL, topic, 0);
     if (rc != MOSQ_ERR_SUCCESS)
     {
         wifi_util_error_print(WIFI_MON, "%s:%d Failed to subscribe to MQTT topic %s: %s\n", __func__, __LINE__,  topic, mosquitto_strerror(rc));
@@ -447,7 +449,7 @@ static int subscribe_to_mqtt_broker(void) {
     if (keyfile) fclose(keyfile);
     
     if(use_tls){
-        mosquitto_tls_set(g_mosq, MQTT_TLS_CA_CERT_FILE, NULL, MQTT_TLS_CLIENT_CERT_FILE, MQTT_TLS_CLIENT_KEY_FILE, NULL);
+        mosquitto_tls_set(g_mqtt_client.mosq, MQTT_TLS_CA_CERT_FILE, NULL, MQTT_TLS_CLIENT_CERT_FILE, MQTT_TLS_CLIENT_KEY_FILE, NULL);
         mqtt_broker_conf.ip = "mqtt.gw.broker";
         mqtt_broker_conf.port = 8883;
     } else {
@@ -456,7 +458,7 @@ static int subscribe_to_mqtt_broker(void) {
     }
     
     wifi_util_dbg_print(WIFI_MON, "%s:%d Connecting to mqtt broker: ip: %s, port: %d\n", __func__, __LINE__, mqtt_broker_conf.ip, mqtt_broker_conf.port);
-    rc = mosquitto_connect(g_mosq, mqtt_broker_conf.ip, mqtt_broker_conf.port, MQTT_KEEPALIVE_TIME);
+    rc = mosquitto_connect(g_mqtt_client.mosq, mqtt_broker_conf.ip, mqtt_broker_conf.port, MQTT_KEEPALIVE_TIME);
     if (rc != MOSQ_ERR_SUCCESS)
     {
         wifi_util_error_print(WIFI_MON, "%s:%d Failed to connect to MQTT broker: %s\n", __func__, __LINE__, mosquitto_strerror(rc));
@@ -467,7 +469,7 @@ static int subscribe_to_mqtt_broker(void) {
     subscribe_to_mqtt_topic(MQTT_WIFI_STATS_TOPIC);
     subscribe_to_mqtt_topic("pod/AS7F70003F/mem_stats_payload_tlv");
     
-    mosquitto_message_callback_set(g_mosq, mqtt_message_arrived_callback);
+    mosquitto_message_callback_set(g_mqtt_client.mosq, mqtt_message_arrived_callback);
 
     return 0;
 }
@@ -477,7 +479,7 @@ static int resubscribe_to_mqtt_broker(void)
     int rc = 0;
 
     wifi_util_dbg_print(WIFI_MON, "%s:%d Reconnecting to MQTT broker\n", __func__, __LINE__);
-    rc = mosquitto_reconnect(g_mosq);
+    rc = mosquitto_reconnect(g_mqtt_client.mosq);
     if (rc != MOSQ_ERR_SUCCESS)
     {
         wifi_util_error_print(WIFI_MON, "%s:%d Failed to reconnect to MQTT broker: %s\n", __func__, __LINE__, mosquitto_strerror(rc));
@@ -488,7 +490,7 @@ static int resubscribe_to_mqtt_broker(void)
     subscribe_to_mqtt_topic(MQTT_WIFI_STATS_TOPIC);
     subscribe_to_mqtt_topic("pod/AS7F70003F/mem_stats_payload_tlv");
 
-    mosquitto_message_callback_set(g_mosq, mqtt_message_arrived_callback);
+    mosquitto_message_callback_set(g_mqtt_client.mosq, mqtt_message_arrived_callback);
 
     return 0;
 }
@@ -497,8 +499,8 @@ static int resubscribe_to_mqtt_broker(void)
 static void *mqtt_loop_thread(void *arg)
 {
     (void)arg;
-    while (g_mqtt_loop_running) {
-        int rc = mosquitto_loop(g_mosq, 0, 1);
+    while (g_mqtt_client.is_msg_polling_running) {
+        int rc = mosquitto_loop(g_mqtt_client.mosq, 0, 1);
         if (rc == MOSQ_ERR_CONN_LOST || rc == MOSQ_ERR_NO_CONN)
             resubscribe_to_mqtt_broker();
         sleep(1);
@@ -511,8 +513,8 @@ int mqtt_msg_init(void) {
     wifi_util_error_print(WIFI_MON, "%s:%d\n", __func__, __LINE__);
     mosquitto_lib_init();
 
-    g_mosq = mosquitto_new(NULL, true, NULL);
-    if (!g_mosq)
+    g_mqtt_client.mosq = mosquitto_new(NULL, true, NULL);
+    if (!g_mqtt_client.mosq)
     {
         wifi_util_error_print(WIFI_MON, "%s:%d Failed to initialize Mosquitto library\n", __func__, __LINE__);
         return 1;
@@ -520,17 +522,17 @@ int mqtt_msg_init(void) {
 
     subscribe_to_mqtt_broker();
 
-    g_mqtt_loop_running = true;
-    pthread_create(&g_mqtt_loop_thr, NULL, mqtt_loop_thread, NULL);
+    g_mqtt_client.is_msg_polling_running = true;
+    pthread_create(&g_mqtt_client.msg_polling_thread, NULL, mqtt_loop_thread, NULL);
 
     return 0;
 }
 
 void mqtt_msg_deinit(void) {
-    g_mqtt_loop_running = false;
-    pthread_join(g_mqtt_loop_thr, NULL);
-    if (g_mosq)
-        mosquitto_destroy(g_mosq);
+    g_mqtt_client.is_msg_polling_running = false;
+    pthread_join(g_mqtt_client.msg_polling_thread, NULL);
+    if (g_mqtt_client.mosq)
+        mosquitto_destroy(g_mqtt_client.mosq);
     mosquitto_lib_cleanup();
 }
 

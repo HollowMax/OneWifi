@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <pthread.h>
-#include <stdatomic.h>
+#include <stdbool.h>
+typedef volatile bool atomic_bool;
+#define MQTT_ATOMIC_STORE(v, value) __atomic_store_n((v), (value), __ATOMIC_RELAXED)
+#define MQTT_ATOMIC_LOAD(v)         __atomic_load_n((v), __ATOMIC_RELAXED)
 #include <unistd.h>
 #include <mosquitto.h>
 #include "wifi_util.h"
@@ -104,7 +107,7 @@ static int mqtt_broker_reconnect(void)
 static void *mqtt_poll_thread(void *arg)
 {
     (void)arg;
-    while (g_mqtt_client.is_msg_polling_running) {
+    while (MQTT_ATOMIC_LOAD(&g_mqtt_client.is_msg_polling_running)) {
         int rc = mosquitto_loop(g_mqtt_client.mosq, 0, 1);
         if (rc == MOSQ_ERR_CONN_LOST || rc == MOSQ_ERR_NO_CONN)
         {
@@ -130,14 +133,14 @@ int mqtt_init(void) {
     if (mqtt_broker_connect() != 0)
         return 1;
 
-    g_mqtt_client.is_msg_polling_running = true;
+    MQTT_ATOMIC_STORE(&g_mqtt_client.is_msg_polling_running, true);
     pthread_create(&g_mqtt_client.msg_polling_thread, NULL, mqtt_poll_thread, NULL);
 
     return 0;
 }
 
 void mqtt_deinit(void) {
-    g_mqtt_client.is_msg_polling_running = false;
+    MQTT_ATOMIC_STORE(&g_mqtt_client.is_msg_polling_running, false);
     pthread_join(g_mqtt_client.msg_polling_thread, NULL);
     if (g_mqtt_client.mosq)
         mosquitto_destroy(g_mqtt_client.mosq);

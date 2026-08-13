@@ -26,6 +26,7 @@
 #include "wifi_mgr.h"
 #include "wifi_util.h"
 #include "scheduler.h"
+#include "wifi_mqtt.h"
 #include <errno.h>
 #include <unistd.h>
 #include <pthread.h>

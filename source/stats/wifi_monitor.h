@@ -255,9 +255,6 @@ int  getApIndexfromClientMac(char *check_mac);
 void update_ecomode_radios(void);
 hash_map_t *get_sta_data_map(unsigned int vap_index);
 
-int mqtt_msg_init(void);
-void mqtt_msg_deinit(void);
-
 typedef struct wifi_mon_provider_element wifi_mon_provider_element_t;
 typedef struct  wifi_mon_collector_element  wifi_mon_collector_element_t;
 

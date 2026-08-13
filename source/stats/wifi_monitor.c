@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <pthread.h>
+#include <stdatomic.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -36,7 +37,6 @@
 #include <sys/socket.h>
 #include <sys/sysinfo.h>
 #include <mosquitto.h>
-#include <ev.h>
 #include <signal.h>
 #include <time.h>
 #include <sys/un.h>
@@ -161,6 +161,8 @@ bool monitor_initialization_done;
 
 static events_monitor_t g_events_monitor;
 static struct mosquitto *g_mosq = NULL;
+static pthread_t g_mqtt_loop_thr;
+static atomic_bool g_mqtt_loop_running = false;
 
 int harvester_get_associated_device_info(int vap_index, char **harvester_buf);
 hash_map_t *get_sta_data_map(unsigned int vap_index);
@@ -492,16 +494,19 @@ static int resubscribe_to_mqtt_broker(void)
 }
 
 
-static void mqtt_loop_timer_callback(struct ev_loop *loop, ev_timer *w, int revents)
+static void *mqtt_loop_thread(void *arg)
 {
-    int rc = mosquitto_loop(g_mosq, 0, 1);
-    if (rc == MOSQ_ERR_CONN_LOST || rc == MOSQ_ERR_NO_CONN)
-    {
-        resubscribe_to_mqtt_broker();
+    (void)arg;
+    while (g_mqtt_loop_running) {
+        int rc = mosquitto_loop(g_mosq, 0, 1);
+        if (rc == MOSQ_ERR_CONN_LOST || rc == MOSQ_ERR_NO_CONN)
+            resubscribe_to_mqtt_broker();
+        sleep(1);
     }
+    return NULL;
 }
-int mqtt_msg_init(ev_timer *mqtt_timeout_watcher) {
-    (void)mqtt_timeout_watcher;
+
+int mqtt_msg_init(void) {
     wifi_util_dbg_print(WIFI_MON, "%s:%d\n", __func__, __LINE__);
     wifi_util_error_print(WIFI_MON, "%s:%d\n", __func__, __LINE__);
     mosquitto_lib_init();
@@ -515,19 +520,15 @@ int mqtt_msg_init(ev_timer *mqtt_timeout_watcher) {
 
     subscribe_to_mqtt_broker();
 
-    if (mqtt_timeout_watcher) {
-        ev_timer_init(mqtt_timeout_watcher, mqtt_loop_timer_callback, 0.0, 1.0);
-        ev_timer_start(EV_DEFAULT, mqtt_timeout_watcher);
-    }
+    g_mqtt_loop_running = true;
+    pthread_create(&g_mqtt_loop_thr, NULL, mqtt_loop_thread, NULL);
 
     return 0;
 }
 
-void mqtt_msg_deinit(ev_timer *mqtt_timeout_watcher) {
-    (void)mqtt_timeout_watcher;
-    if (mqtt_timeout_watcher) {
-        ev_timer_stop(EV_DEFAULT, mqtt_timeout_watcher);
-    }
+void mqtt_msg_deinit(void) {
+    g_mqtt_loop_running = false;
+    pthread_join(g_mqtt_loop_thr, NULL);
     if (g_mosq)
         mosquitto_destroy(g_mosq);
     mosquitto_lib_cleanup();

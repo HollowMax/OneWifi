@@ -87,7 +87,6 @@ static int mqtt_broker_reconnect(void)
     }
 
     mqtt_subscribe_topic(MQTT_WIFI_STATS_TOPIC);
-    mqtt_subscribe_topic("pod/AS7F70003F/mem_stats_payload_tlv");
 
     mosquitto_message_callback_set(g_mqtt_client.mosq, mqtt_on_message_cb);
 

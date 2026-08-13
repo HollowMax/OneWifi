@@ -1953,11 +1953,12 @@ int validate_and_sync_private_vap_credentials()
 int start_wifi_ctrl(wifi_ctrl_t *ctrl)
 {
     int monitor_ret = 0;
-    ev_timer mqtt_timeout_watcher;
+    /*ev_timer mqtt_timeout_watcher;*/
 
     monitor_ret = init_wifi_monitor();
 
-    mqtt_msg_init(&mqtt_timeout_watcher);
+    /*mqtt_msg_init(&mqtt_timeout_watcher);*/
+    mqtt_msg_init();
 
     init_wireless_interface_mac();
 
@@ -2021,7 +2022,8 @@ int start_wifi_ctrl(wifi_ctrl_t *ctrl)
 #ifdef ONEWIFI_CAC_APP_SUPPORT
     apps_mgr_cac_event(&ctrl->apps_mgr, wifi_event_type_exec, wifi_event_exec_stop, NULL, 0);
 #endif
-    mqtt_msg_deinit(&mqtt_timeout_watcher);
+    /*mqtt_msg_deinit(&mqtt_timeout_watcher);*/
+    mqtt_msg_deinit();
     wifi_util_info_print(WIFI_CTRL,"%s:%d Exited queue_wifi_ctrl_task.\n",__FUNCTION__,__LINE__);
     return RETURN_OK;
 }

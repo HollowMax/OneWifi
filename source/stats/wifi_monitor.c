@@ -503,8 +503,7 @@ static int subscribe_to_mqtt_broker(void) {
 /*}*/
 /**/
 /**/
-int mqtt_msg_init(ev_timer *mqtt_timeout_watcher) {
-    (void)mqtt_timeout_watcher;
+int mqtt_msg_init() {
     /*wifi_util_dbg_print(WIFI_MON, "%s:%d\n", __func__, __LINE__);*/
     /*wifi_util_error_print(WIFI_MON, "%s:%d\n", __func__, __LINE__);*/
     mosquitto_lib_init();
@@ -526,8 +525,9 @@ int mqtt_msg_init(ev_timer *mqtt_timeout_watcher) {
     return 0;
 }
 
-void mqtt_msg_deinit(ev_timer *mqtt_timeout_watcher) {
-    (void)mqtt_timeout_watcher;
+/*void mqtt_msg_deinit(ev_timer *mqtt_timeout_watcher) {*/
+void mqtt_msg_deinit() {
+    /*(void)mqtt_timeout_watcher;*/
     /*if (mqtt_timeout_watcher) {*/
     /*    ev_timer_stop(EV_DEFAULT, mqtt_timeout_watcher);*/
     /*}*/

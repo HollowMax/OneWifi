@@ -22,7 +22,7 @@
 
 #include "collection.h"
 #include <math.h>
-#include <ev.h>
+/*#include <ev.h>*/
 #include "wifi_base.h"
 
 #ifndef WIFI_HAL_VERSION_3
@@ -256,8 +256,10 @@ int  getApIndexfromClientMac(char *check_mac);
 void update_ecomode_radios(void);
 hash_map_t *get_sta_data_map(unsigned int vap_index);
 
-int mqtt_msg_init(ev_timer *timeout_watcher);
-void mqtt_msg_deinit(ev_timer *timeout_watcher);
+/*int mqtt_msg_init(ev_timer *timeout_watcher);*/
+/*void mqtt_msg_deinit(ev_timer *timeout_watcher);*/
+int mqtt_msg_init();
+void mqtt_msg_deinit();
 
 typedef struct wifi_mon_provider_element wifi_mon_provider_element_t;
 typedef struct  wifi_mon_collector_element  wifi_mon_collector_element_t;

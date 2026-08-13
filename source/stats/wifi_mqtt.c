@@ -68,7 +68,6 @@ static int subscribe_to_mqtt_broker(void) {
     }
 
     subscribe_to_mqtt_topic(MQTT_WIFI_STATS_TOPIC);
-    subscribe_to_mqtt_topic("pod/AS7F70003F/mem_stats_payload_tlv");
 
     mosquitto_message_callback_set(g_mqtt_client.mosq, mqtt_message_arrived_callback);
 

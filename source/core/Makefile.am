@@ -64,11 +64,6 @@ AM_CPPFLAGS = -Wall -Werror
 ACLOCAL_AMFLAGS = -I m4
 hardware_platform = i686-linux-gnu
 bin_PROGRAMS = OneWifi
-
-noinst_LTLIBRARIES = libclistatlv.la
-libclistatlv_la_SOURCES = $(top_srcdir)/source/stats/tlv/tlv.cpp \
-                    $(top_srcdir)/source/stats/tlv/client_sta_deser.cpp
-libclistatlv_la_CPPFLAGS = $(OneWifi_CPPFLAGS)
 OneWifi_CPPFLAGS = -I/var/tmp/pc-rdkb/include/dbus-1.0 -I$(top_srcdir)/../CcspCommonLibrary/source/ccsp/custom -I$(top_srcdir)/../CcspCommonLibrary/source/ccsp/include -I$(top_srcdir)/../CcspCommonLibrary/source/debug_api/include -I$(top_srcdir)/../CcspCommonLibrary/source/cosa/include -I$(top_srcdir)/../CcspCommonLibrary/source/cosa/include/linux -I$(top_srcdir)/../CcspCommonLibrary/source/ccsp/components/include -I$(top_srcdir)/../CcspCommonLibrary/source/cosa/package/slap/include -I$(top_srcdir)/../hal/include -I$(top_srcdir)/../CcspCommonLibrary/source/util_api/http/include -I$(top_srcdir)/../CcspCommonLibrary/source/util_api/ansc/include -I$(top_srcdir)/../CcspCommonLibrary/source/ccsp/components/common/MessageBusHelper/include -I$(top_srcdir)/../CcspCommonLibrary/source/ccsp/components/common/PoamIrepFolder -I$(top_srcdir)/include/wifi_ssp -I$(top_srcdir)/./include -I$(top_srcdir)/source/core -I$(top_srcdir)/source/db -I$(top_srcdir)/lib/ovsdb -I$(top_srcdir)/lib/inc -I$(top_srcdir)/lib/json_util -I$(top_srcdir)/lib/ds -I$(top_srcdir)/lib/common -I$(top_srcdir)/lib/pjs -I$(top_srcdir)/lib/log -I$(top_srcdir)/lib/const -I$(top_srcdir)/lib/schema -I$(top_srcdir)/lib/osp -I$(top_srcdir)/lib/osa -I$(top_srcdir)/lib/psfs -I$(top_srcdir)/lib/qm -I$(top_srcdir)/source/utils -I$(top_srcdir)/source/core/services -I$(top_srcdir)/source/stats -I$(top_srcdir)/source/stats/tlv -I$(top_srcdir)/source/utils/math_utils/inc  -I$(top_srcdir)/source/utils/quality_mgr/inc -I$(top_srcdir)/source/apps/linkquality -I$(top_srcdir)/lib/pktgen -I$(top_srcdir)/source/stubs -I$(top_srcdir)/lib/datapipeline $(CPPFLAGS)
 
 if ONEWIFI_DBUS_SUPPORT
@@ -104,7 +99,7 @@ OneWifi_SOURCES += $(top_srcdir)/source/core/services/vap_svc.c  $(top_srcdir)/s
 OneWifi_SOURCES += $(top_srcdir)/source/core/services/vap_svc_mesh_ext.c
 
 OneWifi_SOURCES += $(top_srcdir)/source/utils/jsonconv.c $(top_srcdir)/source/utils/collection.c $(top_srcdir)/source/utils/scheduler.c $(top_srcdir)/source/utils/caps.c
-OneWifi_SOURCES += $(top_srcdir)/source/stats/wifi_monitor.c $(top_srcdir)/source/stats/wifi_mqtt.c $(top_srcdir)/source/stats/client_sta_handler.c $(top_srcdir)/source/utils/ext_blaster.pb-c.c $(top_srcdir)/source/stats/wifi_stats.c $(top_srcdir)/source/stats/wifi_stats_radio_channel.c $(top_srcdir)/source/stats/wifi_stats_neighbor_report.c $(top_srcdir)/source/stats/wifi_stats_radio_diagnostics.c $(top_srcdir)/source/stats/wifi_stats_assoc_client.c $(top_srcdir)/source/stats/wifi_stats_radio_temperature.c $(top_srcdir)/source/stats/wifi_stats_vap.c
+OneWifi_SOURCES += $(top_srcdir)/source/stats/wifi_monitor.c $(top_srcdir)/source/stats/wifi_mqtt.c $(top_srcdir)/source/stats/client_sta_handler.c $(top_srcdir)/source/stats/tlv/tlv.cpp $(top_srcdir)/source/stats/tlv/client_sta_deser.cpp $(top_srcdir)/source/utils/ext_blaster.pb-c.c $(top_srcdir)/source/stats/wifi_stats.c $(top_srcdir)/source/stats/wifi_stats_radio_channel.c $(top_srcdir)/source/stats/wifi_stats_neighbor_report.c $(top_srcdir)/source/stats/wifi_stats_radio_diagnostics.c $(top_srcdir)/source/stats/wifi_stats_assoc_client.c $(top_srcdir)/source/stats/wifi_stats_radio_temperature.c $(top_srcdir)/source/stats/wifi_stats_vap.c
 
 OneWifi_SOURCES += $(top_srcdir)/source/stubs/wifi_stubs.c
 OneWifi_SOURCES += $(top_srcdir)/source/ccsp/ccsp.c
@@ -227,7 +222,6 @@ endif
 OneWifi_SOURCES += $(top_srcdir)/lib/common/os_time.c $(top_srcdir)/lib/common/util.c $(top_srcdir)/lib/common/monitor.c $(top_srcdir)/lib/common/os.c $(top_srcdir)/lib/common/os_util.c $(top_srcdir)/lib/common/os_exec.c $(top_srcdir)/lib/const/const.c $(top_srcdir)/lib/ds/ds_tree.c $(top_srcdir)/lib/json_util/string.c $(top_srcdir)/lib/json_util/memdbg.c $(top_srcdir)/lib/json_util/future.c $(top_srcdir)/lib/log/log.c $(top_srcdir)/lib/log/log_syslog.c $(top_srcdir)/lib/log/log_stdout.c $(top_srcdir)/lib/log/log_traceback.c $(top_srcdir)/lib/osa/os_backtrace.c $(top_srcdir)/lib/osa/os_socket.c $(top_srcdir)/lib/osa/os_nif_linux.c $(top_srcdir)/lib/osa/os_regex.c $(top_srcdir)/lib/osa/os_proc.c $(top_srcdir)/lib/osa/os_file_ops.c $(top_srcdir)/lib/osa/os_file.c $(top_srcdir)/lib/osa/os_random.c $(top_srcdir)/lib/ovsdb/ovsdb.c $(top_srcdir)/lib/ovsdb/ovsdb_method.c $(top_srcdir)/lib/ovsdb/ovsdb_update.c $(top_srcdir)/lib/ovsdb/ovsdb_sync.c $(top_srcdir)/lib/ovsdb/ovsdb_sync_api.c $(top_srcdir)/lib/ovsdb/ovsdb_table.c $(top_srcdir)/lib/ovsdb/ovsdb_cache.c $(top_srcdir)/lib/ovsdb/ovsdb_utils.c $(top_srcdir)/lib/pjs/pjs_array.c $(top_srcdir)/lib/pjs/pjs_ovs_basic.c $(top_srcdir)/lib/pjs/pjs_basic.c $(top_srcdir)/lib/pjs/pjs_types.c $(top_srcdir)/lib/pjs/pjs_ovs_set.c $(top_srcdir)/lib/pjs/pjs_ovs_map.c $(top_srcdir)/lib/qm/qm_conn.c $(top_srcdir)/lib/schema/schema.c $(top_srcdir)/lib/pktgen/pktgen.c $(top_srcdir)/lib/datapipeline/dppline.c $(top_srcdir)/lib/datapipeline/opensync_stats.pb-c.c $(top_srcdir)/lib/datapipeline/osp_unit_rdk.c $(top_srcdir)/lib/datapipeline/devinfo.c
 
 OneWifi_LDFLAGS = -rdynamic -lwebconfig_framework -lsecure_wrapper $(SYSTEMD_LDFLAGS) -luuid -lsecure_wrapper -lmsgpackc -lcjson  -lm -ljansson -lev -lprotobuf-c -ltrower-base64 -lstdc++
-OneWifi_LDADD = libclistatlv.la
 
 if ONEWIFI_DML_SUPPORT
 OneWifi_LDFLAGS += -lccsp_common

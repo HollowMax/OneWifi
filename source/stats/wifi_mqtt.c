@@ -26,7 +26,7 @@ static struct {
     atomic_bool       is_msg_polling_running;
 } g_mqtt_client = { .mosq = NULL, .is_msg_polling_running = false };
 
-static void mqtt_message_arrived_callback(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message) {
+static void mqtt_on_message_cb(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message) {
     if (message->topic != NULL)
     {
         wifi_util_dbg_print(WIFI_MON, "%s:%d Received MY_MQTT message on topic %s payload %.*s\n", __func__, __LINE__, message->topic, message->payloadlen, message->payload);
@@ -35,7 +35,7 @@ static void mqtt_message_arrived_callback(struct mosquitto *mosq, void *userdata
     }
 }
 
-static int subscribe_to_mqtt_topic(const char *topic) {
+static int mqtt_subscribe_topic(const char *topic) {
     int rc;
 
     wifi_util_dbg_print(WIFI_MON, "%s:%d Subscribing to MQTT topic: %s\n", __func__, __LINE__, topic);
@@ -48,7 +48,7 @@ static int subscribe_to_mqtt_topic(const char *topic) {
     return 0;
 }
 
-static int subscribe_to_mqtt_broker(void) {
+static int mqtt_broker_connect(void) {
     int rc = 0;
     struct mqtt_broker_conf mqtt_broker_conf = {
         .ip   = "mqtt.gw.broker",
@@ -67,14 +67,14 @@ static int subscribe_to_mqtt_broker(void) {
         return 1;
     }
 
-    subscribe_to_mqtt_topic(MQTT_WIFI_STATS_TOPIC);
+    mqtt_subscribe_topic(MQTT_WIFI_STATS_TOPIC);
 
-    mosquitto_message_callback_set(g_mqtt_client.mosq, mqtt_message_arrived_callback);
+    mosquitto_message_callback_set(g_mqtt_client.mosq, mqtt_on_message_cb);
 
     return 0;
 }
 
-static int resubscribe_to_mqtt_broker(void)
+static int mqtt_broker_reconnect(void)
 {
     int rc = 0;
 
@@ -86,27 +86,27 @@ static int resubscribe_to_mqtt_broker(void)
         return 1;
     }
 
-    subscribe_to_mqtt_topic(MQTT_WIFI_STATS_TOPIC);
-    subscribe_to_mqtt_topic("pod/AS7F70003F/mem_stats_payload_tlv");
+    mqtt_subscribe_topic(MQTT_WIFI_STATS_TOPIC);
+    mqtt_subscribe_topic("pod/AS7F70003F/mem_stats_payload_tlv");
 
-    mosquitto_message_callback_set(g_mqtt_client.mosq, mqtt_message_arrived_callback);
+    mosquitto_message_callback_set(g_mqtt_client.mosq, mqtt_on_message_cb);
 
     return 0;
 }
 
-static void *mqtt_loop_thread(void *arg)
+static void *mqtt_poll_thread(void *arg)
 {
     (void)arg;
     while (g_mqtt_client.is_msg_polling_running) {
         int rc = mosquitto_loop(g_mqtt_client.mosq, 0, 1);
         if (rc == MOSQ_ERR_CONN_LOST || rc == MOSQ_ERR_NO_CONN)
-            resubscribe_to_mqtt_broker();
+            mqtt_broker_reconnect();
         sleep(1);
     }
     return NULL;
 }
 
-int mqtt_msg_init(void) {
+int mqtt_init(void) {
     wifi_util_dbg_print(WIFI_MON, "%s:%d\n", __func__, __LINE__);
     wifi_util_error_print(WIFI_MON, "%s:%d\n", __func__, __LINE__);
     mosquitto_lib_init();
@@ -118,15 +118,15 @@ int mqtt_msg_init(void) {
         return 1;
     }
 
-    subscribe_to_mqtt_broker();
+    mqtt_broker_connect();
 
     g_mqtt_client.is_msg_polling_running = true;
-    pthread_create(&g_mqtt_client.msg_polling_thread, NULL, mqtt_loop_thread, NULL);
+    pthread_create(&g_mqtt_client.msg_polling_thread, NULL, mqtt_poll_thread, NULL);
 
     return 0;
 }
 
-void mqtt_msg_deinit(void) {
+void mqtt_deinit(void) {
     g_mqtt_client.is_msg_polling_running = false;
     pthread_join(g_mqtt_client.msg_polling_thread, NULL);
     if (g_mqtt_client.mosq)

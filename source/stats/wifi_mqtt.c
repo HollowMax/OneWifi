@@ -14,7 +14,7 @@ typedef volatile bool atomic_bool;
 #define MQTT_TLS_CLIENT_CERT_FILE "/tmp/mqtt_certs/mwo.crt"
 #define MQTT_TLS_CLIENT_KEY_FILE  "/tmp/mqtt_certs/mwo.key"
 
-#define MQTT_WIFI_STATS_TOPIC "pod/wie"
+#define MQTT_WIFI_STATS_TOPIC "pod/AS7F70003F/wie"
 
 #define MQTT_KEEPALIVE_TIME 30
 

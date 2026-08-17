@@ -21,24 +21,33 @@ static void fmt_int_array(char *buf, size_t bufsz, const int *arr, int count)
 
 static void log_client(const ClientStatInfo *client, int vap_idx, int client_idx)
 {
-    wifi_util_info_print(WIFI_MON,
-        "vap[%d] client[%d]: addr=%s aid=%d chan=%d rssi=%d min_rssi=%d max_rssi=%d"
-        " txrate=%s rxrate=%s txseq=%d rxseq=%d idle=%d erp=%d maxrate_dot11=%d"
-        " rxnss=%d txnss=%d psmode=%d assoc=%s\n",
-        vap_idx, client_idx,
-        client->addr, client->aid, client->chan, client->rssi,
-        client->min_rssi, client->max_rssi,
-        client->txrate, client->rxrate, client->txseq, client->rxseq,
-        client->idle, client->erp, client->maxrate_dot11,
-        client->rxnss, client->txnss, client->psmode, client->assoc_time);
-
-    wifi_util_info_print(WIFI_MON,
-        "vap[%d] client[%d]: caps=%s xcaps=%s acaps=%s htcaps=%s vhtcaps=%s"
-        " ies=%s mode=%s state=%s phymode=%s\n",
-        vap_idx, client_idx,
-        client->caps, client->xcaps, client->acaps,
-        client->htcaps, client->vhtcaps,
-        client->ies, client->mode, client->state, client->max_sta_phymode);
+    wifi_util_info_print(WIFI_MON, "vap[%d] Client[%d]\n", vap_idx, client_idx);
+    wifi_util_info_print(WIFI_MON, "    addr                        : %s\n", client->addr);
+    wifi_util_info_print(WIFI_MON, "    aid                         : %d\n", client->aid);
+    wifi_util_info_print(WIFI_MON, "    chan                        : %d\n", client->chan);
+    wifi_util_info_print(WIFI_MON, "    txrate                      : %s\n", client->txrate);
+    wifi_util_info_print(WIFI_MON, "    rxrate                      : %s\n", client->rxrate);
+    wifi_util_info_print(WIFI_MON, "    rssi                        : %d\n", client->rssi);
+    wifi_util_info_print(WIFI_MON, "    min_rssi                    : %d\n", client->min_rssi);
+    wifi_util_info_print(WIFI_MON, "    max_rssi                    : %d\n", client->max_rssi);
+    wifi_util_info_print(WIFI_MON, "    idle                        : %d\n", client->idle);
+    wifi_util_info_print(WIFI_MON, "    txseq                       : %d\n", client->txseq);
+    wifi_util_info_print(WIFI_MON, "    rxseq                       : %d\n", client->rxseq);
+    wifi_util_info_print(WIFI_MON, "    caps                        : %s\n", client->caps);
+    wifi_util_info_print(WIFI_MON, "    xcaps                       : %s\n", client->xcaps);
+    wifi_util_info_print(WIFI_MON, "    acaps                       : %s\n", client->acaps);
+    wifi_util_info_print(WIFI_MON, "    erp                         : %d\n", client->erp);
+    wifi_util_info_print(WIFI_MON, "    state                       : %s\n", client->state);
+    wifi_util_info_print(WIFI_MON, "    maxrate_dot11               : %d\n", client->maxrate_dot11);
+    wifi_util_info_print(WIFI_MON, "    htcaps                      : %s\n", client->htcaps);
+    wifi_util_info_print(WIFI_MON, "    vhtcaps                     : %s\n", client->vhtcaps);
+    wifi_util_info_print(WIFI_MON, "    assoc_time                  : %s\n", client->assoc_time);
+    wifi_util_info_print(WIFI_MON, "    ies                         : %s\n", client->ies);
+    wifi_util_info_print(WIFI_MON, "    mode                        : %s\n", client->mode);
+    wifi_util_info_print(WIFI_MON, "    rxnss                       : %d\n", client->rxnss);
+    wifi_util_info_print(WIFI_MON, "    txnss                       : %d\n", client->txnss);
+    wifi_util_info_print(WIFI_MON, "    psmode                      : %d\n", client->psmode);
+    wifi_util_info_print(WIFI_MON, "    max_sta_phymode             : %s\n", client->max_sta_phymode);
 
     if (client->has_extended_info) {
         char op_classes[WIFI_STATS_MAX_SUPPORTED_CLASSES * 4];
@@ -49,16 +58,18 @@ static void log_client(const ClientStatInfo *client, int vap_idx, int client_idx
         fmt_int_array(rates, sizeof(rates),
                       client->supported_rates, client->supported_rates_count);
 
-        wifi_util_info_print(WIFI_MON,
-            "vap[%d] client[%d]: snr=%d band=%s ht=%d vht=%d mu=%d"
-            " min_tx_power=%d max_tx_power=%d op_class=%d"
-            " op_classes=[%s] rates=[%s]\n",
-            vap_idx, client_idx,
-            client->snr, client->operating_band,
-            client->ht_capable, client->vht_capable, client->mu_capable,
-            client->min_tx_power, client->max_tx_power,
-            client->current_operating_class,
-            op_classes, rates);
+        wifi_util_info_print(WIFI_MON, "    snr                         : %d\n", client->snr);
+        wifi_util_info_print(WIFI_MON, "    operating_band              : %s\n", client->operating_band);
+        wifi_util_info_print(WIFI_MON, "    ht_capable                  : %d\n", client->ht_capable);
+        wifi_util_info_print(WIFI_MON, "    vht_capable                 : %d\n", client->vht_capable);
+        wifi_util_info_print(WIFI_MON, "    mu_capable                  : %d\n", client->mu_capable);
+        wifi_util_info_print(WIFI_MON, "    min_tx_power                : %d\n", client->min_tx_power);
+        wifi_util_info_print(WIFI_MON, "    max_tx_power                : %d\n", client->max_tx_power);
+        wifi_util_info_print(WIFI_MON, "    current_operating_class     : %d\n", client->current_operating_class);
+        wifi_util_info_print(WIFI_MON, "    supported_operating_classes : %s\n", op_classes);
+        wifi_util_info_print(WIFI_MON, "    supported_operating_classes_count: %d\n", client->supported_operating_classes_count);
+        wifi_util_info_print(WIFI_MON, "    supported_rates             : %s\n", rates);
+        wifi_util_info_print(WIFI_MON, "    supported_rates_count       : %d\n", client->supported_rates_count);
     }
 }
 

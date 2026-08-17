@@ -33,7 +33,7 @@ static struct {
 static void mqtt_on_message_cb(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message) {
     if (message->topic != NULL)
     {
-        wifi_util_info_print(WIFI_MON, "%s:%d message received on topic '%s' payload '%.*s'\n", __func__, __LINE__, message->topic, message->payloadlen, (char *)message->payload);
+        wifi_util_info_print(WIFI_MON, "%s:%d message received on topic '%s' (%d bytes)\n", __func__, __LINE__, message->topic, message->payloadlen);
         client_sta_handle_message((const uint8_t *)message->payload, message->payloadlen);
     } else {
         wifi_util_error_print(WIFI_MON, "%s:%d message received with empty topic\n", __func__, __LINE__);
